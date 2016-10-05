@@ -84,6 +84,9 @@ static void defaul_signal_handlers( void ) {
   sigemptyset(&signal_mask);
   sigaddset (&signal_mask, SIGPIPE);
   sigaddset (&signal_mask, SIGHUP);
+#ifdef WANT_TRANSLATION
+  sigaddset (&signal_mask, SIGUSR1);
+#endif
   sigaddset (&signal_mask, SIGINT);
   sigaddset (&signal_mask, SIGALRM);
   pthread_sigmask (SIG_BLOCK, &signal_mask, NULL);

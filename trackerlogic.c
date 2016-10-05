@@ -454,7 +454,6 @@ void exerr( char * message ) {
 }
 
 void trackerlogic_init( ) {
-  load_translation_rules();
   g_tracker_id = random();
 
   if( !g_stats_path )
@@ -466,6 +465,9 @@ void trackerlogic_init( ) {
   clean_init( );
   fullscrape_init( );
   accesslist_init( );
+#ifdef WANT_TRANSLATION
+  translation_rules_init();
+#endif
   livesync_init( );
   stats_init( );
 }
@@ -491,12 +493,14 @@ void trackerlogic_deinit( void ) {
   /* Deinitialise background worker threads */
   stats_deinit( );
   livesync_deinit( );
+#ifdef WANT_TRANSLATION
+  translation_rules_deinit();
+#endif
   accesslist_deinit( );
   fullscrape_deinit( );
   clean_deinit( );
   /* Release mutexes */
   mutex_deinit( );
-  unload_translation_rules();
 }
 
 const char *g_version_trackerlogic_c = "$Source$: $Revision$\n";

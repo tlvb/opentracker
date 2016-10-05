@@ -1,4 +1,5 @@
 // vim: et:ts=2:sw=2
+#ifdef WANT_TRANSLATION
 #ifndef address_translation_h
 #define address_translation_h
 #include "trackerlogic.h"
@@ -28,8 +29,9 @@ typedef struct {
 extern char *g_address_translation_rules_file;
 #endif
 
-void load_translation_rules(void);
-void unload_translation_rules(void);
+void translation_rules_init(void);
+void translation_rules_deinit(void);
 void translate(char *peer, ot_peer *requester);
 
+#endif
 #endif
