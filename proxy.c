@@ -469,7 +469,7 @@ static void server_mainloop() {
   int64 sock;
 
   /* inlined livesync_init() */
-  memset( g_peerbuffer_start, 0, sizeof( g_peerbuffer_start ) ); 
+  memset( g_peerbuffer_start, 0, sizeof( g_peerbuffer_start ) );
   g_peerbuffer_pos = g_peerbuffer_start;
   memcpy( g_peerbuffer_pos, &g_tracker_id, sizeof( g_tracker_id ) );
   uint32_pack_big( (char*)g_peerbuffer_pos + sizeof( g_tracker_id ), OT_SYNC_PEER);

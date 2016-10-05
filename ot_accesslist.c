@@ -212,7 +212,7 @@ void loglist_reset( ) {
   free( g_lognets_list.data );
   g_lognets_list.data = 0;
   g_lognets_list.size = g_lognets_list.space = 0;
-  pthread_mutex_unlock(&g_lognets_list_mutex);    
+  pthread_mutex_unlock(&g_lognets_list_mutex);
 }
 
 int loglist_check_address( const ot_ip6 address ) {
@@ -263,7 +263,7 @@ int proxylist_check_proxy( const ot_ip6 proxy, const ot_ip6 address ) {
   pthread_mutex_lock(&g_proxies_list_mutex);
 
   if( ( map = get_value_for_net( proxy, &g_proxies_list, sizeof(ot_proxymap) ) ) )
-    if( !address || get_value_for_net( address, &map->networks, sizeof(ot_net) ) ) 
+    if( !address || get_value_for_net( address, &map->networks, sizeof(ot_net) ) )
       result = 1;
 
   pthread_mutex_unlock(&g_proxies_list_mutex);

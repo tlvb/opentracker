@@ -132,7 +132,7 @@ static void help( char *name ) {
 #elif defined( WANT_ACCESSLIST_WHITE )
   HELPLINE("-w file","specify whitelist file.");
 #endif
-#ifdef WANT_ADDRESS_TRANSLATION
+#ifdef WANT_TRANSLATION
   HELPLINE("-T file","specify address translation rules file.");
 #endif
 

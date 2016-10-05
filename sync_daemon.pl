@@ -243,7 +243,7 @@ sub merge_sync {
         #       42.23.42.23:55555 => 0000000000000000
 
         my $hashref = shift;
- 
+
         my $nonuniq_hash_counter = 0;
         my $nonuniq_peer_counter = 0;
         my $hash_counter = 0;

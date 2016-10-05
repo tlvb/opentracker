@@ -54,7 +54,7 @@ static void http_senddata( const int64 sock, struct ot_workstruct *ws ) {
       memmove( array_start(&cookie->request), ws->request + ws->header_size, rest );
       array_truncate( &cookie->request, 1, rest );
     } else
-      array_catb(&cookie->request, ws->request + ws->header_size, rest );    
+      array_catb(&cookie->request, ws->request + ws->header_size, rest );
   } else
     array_reset( &cookie->request );
 
@@ -253,7 +253,7 @@ static const ot_keywords keywords_format[] =
 }
 
 #ifdef WANT_MODEST_FULLSCRAPES
-static pthread_mutex_t g_modest_fullscrape_mutex = PTHREAD_MUTEX_INITIALIZER; 
+static pthread_mutex_t g_modest_fullscrape_mutex = PTHREAD_MUTEX_INITIALIZER;
 static ot_vector g_modest_fullscrape_timeouts;
 typedef struct { ot_ip6 ip; ot_time last_fullscrape; } ot_scrape_log;
 #endif
@@ -488,7 +488,7 @@ static ssize_t http_handle_announce( const int64 sock, struct ot_workstruct *ws,
             bits = 128;
           else {
             parsed = scan_short( tmp_buf + parsed, &bits );
-            if( !parsed ) HTTPERROR_400_PARAM; 
+            if( !parsed ) HTTPERROR_400_PARAM;
             if( ip6_isv4mapped( net.address ) )
               bits += 96;
           }
@@ -548,8 +548,8 @@ ssize_t http_handle_request( const int64 sock, struct ot_workstruct *ws ) {
           g_logchain_first = g_logchain_last = log;
         else {
           g_logchain_last->next = log;
-          g_logchain_last = log;  
-        }        
+          g_logchain_last = log;
+        }
       } else
         free( log );
     }
@@ -563,7 +563,7 @@ ssize_t http_handle_request( const int64 sock, struct ot_workstruct *ws ) {
   memcpy( ws->debugbuf, ws->request, reply_off );
   ws->debugbuf[ reply_off ] = 0;
 #endif
-  
+
   /* Tell subroutines where to put reply data */
   ws->reply = ws->outbuf + SUCCESS_HTTP_HEADER_LENGTH;
 

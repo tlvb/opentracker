@@ -492,7 +492,7 @@ static void stats_return_fulllog( int *iovec_entries, struct iovec **iovector, c
   char * re = r + OT_STATS_TMPSIZE;
 
   g_logchain_first = g_logchain_last = 0;
-  
+
   while( loglist ) {
     if( r + ( loglist->size + 64 ) >= re ) {
       r = iovec_fix_increase_or_free( iovec_entries, iovector, r, 32 * OT_STATS_TMPSIZE );

@@ -58,19 +58,19 @@ void add_torrent_from_saved_state( ot_hash hash, ot_time base, size_t down_count
 
   if( !accesslist_hashisvalid( hash ) )
     return mutex_bucket_unlock_by_hash( hash, 0 );
-  
+
   torrent = vector_find_or_insert( torrents_list, (void*)hash, sizeof( ot_torrent ), OT_HASH_COMPARE_SIZE, &exactmatch );
   if( !torrent || exactmatch )
     return mutex_bucket_unlock_by_hash( hash, 0 );
 
   /* Create a new torrent entry, then */
   memcpy( torrent->hash, hash, sizeof(ot_hash) );
-    
+
   if( !( torrent->peer_list = malloc( sizeof (ot_peerlist) ) ) ) {
     vector_remove_torrent( torrents_list, torrent );
     return mutex_bucket_unlock_by_hash( hash, 0 );
   }
-    
+
   byte_zero( torrent->peer_list, sizeof( ot_peerlist ) );
   torrent->peer_list->base = base;
   torrent->peer_list->down_count = down_count;
@@ -215,14 +215,14 @@ static size_t return_peers_all( ot_peerlist *peer_list, char *reply ) {
     while( peer_count-- ) {
       if( OT_PEERFLAG(peers) & PEER_FLAG_SEEDING ) {
         r_end-=OT_PEER_COMPARE_SIZE;
-        memcpy(r_end,peers++,OT_PEER_COMPARE_SIZE);      
+        memcpy(r_end,peers++,OT_PEER_COMPARE_SIZE);
 #ifdef WANT_TRANSLATION
-		translate(r_end, reqfrom);
+        translate(r_end, reqfrom);
 #endif
       } else {
         memcpy(reply,peers++,OT_PEER_COMPARE_SIZE);
 #ifdef WANT_TRANSLATION
-		translate(reply, reqfrom);
+        translate(reply, reqfrom);
 #endif
         reply+=OT_PEER_COMPARE_SIZE;
       }
@@ -243,7 +243,7 @@ static size_t return_peers_selection( ot_peerlist *peer_list, size_t amount, cha
   unsigned int shift = 0;
   size_t       result = OT_PEER_COMPARE_SIZE * amount;
   char       * r_end = reply + result;
-  
+
   if( OT_PEERLIST_HASBUCKETS(peer_list) ) {
     num_buckets = bucket_list->size;
     bucket_list = (ot_vector *)bucket_list->data;
@@ -274,14 +274,14 @@ static size_t return_peers_selection( ot_peerlist *peer_list, size_t amount, cha
     peer = ((ot_peer*)bucket_list[bucket_index].data) + bucket_offset;
     if( OT_PEERFLAG(peer) & PEER_FLAG_SEEDING ) {
       r_end-=OT_PEER_COMPARE_SIZE;
-      memcpy(r_end,peer,OT_PEER_COMPARE_SIZE);      
+      memcpy(r_end,peer,OT_PEER_COMPARE_SIZE);
 #ifdef WANT_TRANSLATION
-		translate(r_end, reqfrom);
+      translate(r_end, reqfrom);
 #endif
     } else {
       memcpy(reply,peer,OT_PEER_COMPARE_SIZE);
 #ifdef WANT_TRANSLATION
-		translate(reply, reqfrom);
+      translate(reply, reqfrom);
 #endif
       reply+=OT_PEER_COMPARE_SIZE;
     }
