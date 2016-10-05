@@ -1,5 +1,6 @@
 # opentracker config file
 #
+#
 
 # I)   Address opentracker will listen on, using both, tcp AND udp family
 #      (note, that port 6969 is implicite if ommitted).
@@ -104,3 +105,9 @@
 #      redirect to another location (shell option -r).
 #
 # tracker.redirect_url https://your.tracker.local/
+
+# VII) If compiled with WANT_TRANSLATION, opentracker can be told to
+#      translate the addresses returned by an announce requesti
+#      (shell option -T).
+#
+# address_translation.rules_file address_translation.conf.sample

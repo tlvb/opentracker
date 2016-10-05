@@ -1,0 +1,66 @@
+# ADDRESS TRANSLATION RATIONALE:
+#
+# ponder the following setup:
+#
+# The initial seeder and tracker are running on the same host behind a NAT-ing gateway.
+# The gateway's external address is 77.0.0.77.
+# The gateway assigns addresses in the 192.168.0.0/16 range to devices on the local net.
+# Port forwarding is set up proprely making both the tracker and seeder are visible on
+# the gateway's external side.
+# The tracker's local address is 192.168.0.42
+# Assume private torrent, no DHT, local peer discovery, etc.
+# DNS or a hosts file for hosts on the local net points the tracker's domain name to the
+# local address, rather than the external. This is needed unless the gateway supports
+# hairpinning.
+#
+# Without address translation, any peer on another host than the tracker/initial seeder
+# will be unable to be the initiator of a connection with to the initial seed,
+# since its ip address is announced as 127.0.0.1.
+#
+# Likewise, any peer on the internet, will be unable to be the initiator of a connection
+# to a peer on the local net, since they will have their announced addresses be the local
+# ones.
+#
+# Some/all of these problems can be fixed by other ways too, e.g. running a tracker and
+# torrent client that supports setting the ip by query string rather than taking it from
+# the connection (but mine does not support that!), and/or getting a gateway that supports
+# hairpinning (but I have a cheap and shitty gateway and no money for new hardware!)
+#
+# Another way is to translate the addresses reported by the tracker,
+# depending on who is asking:
+#
+# The rules are tested from top to bottom, the first rule that matches is used.
+# "nothing more" can be used to force a match without any translation, in order
+# to make hosts on specific nets but not yet matching bow out of trying to
+# apply a more general rule.
+# The first CIDR net is matched against the host that sent the announce request.
+# The second CIDR net is matched against the peers for the specific torrent asked about.
+# The third IP address is what substitutes the addresses that matched the second CIDR net.
+# E.g. for the setup previously described>
+
+# The initial seed can access both the external and local net, so it should see all
+# addresses as they are, bow out.
+for 127.0.0.1/32 nothing more
+
+# Clients on the local net should reach the initial seed host by it's local-net address
+# but that is all
+for 192.168.0.0/16 translate 127.0.0.1/32 to 192.168.0.42
+for 192.168.0.0/16 nothing more
+
+# anything outside the local net should reach hosts on the local net by the external
+# ip address. How many of the local peers that can actually be connected to is a
+# question of port forwarding.
+for 0.0.0.0/0 translate 127.0.0.1/32 to 77.0.0.77
+for 0.0.0.0/0 translate 192.168.0.0/16 to 77.0.0.77
+
+# ADDRESS TRANSLATION RULE SYNTAX, somewhat BNF-inspired:
+#
+# line             ::= BOL ( "" | comment | rule ) EOL
+# comment          ::= ( space | '#' ) anything-not-line-ending*
+# space            ::= one or more characters that count as space by isspace()
+# rule             ::= "for" space CIDR space ( stopper-spec | translation-spec )
+# stopper-spec     ::= "nothing more"
+# translation-spec ::= "translate" space CIDR space "to" space IP
+# CIDR             ::= IP "/" bits
+# IP               ::= ipv4 or ipv6 address, what makes sense depends on compilation options
+# bits             ::= network / subnet bit count, should be in range of the ip address length
