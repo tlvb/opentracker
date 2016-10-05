@@ -37,6 +37,9 @@
 #include "ot_stats.h"
 #include "ot_livesync.h"
 
+/* hacks */
+#include "address_translation.h"
+
 /* Globals */
 time_t       g_now_seconds;
 char *       g_redirecturl;
@@ -128,6 +131,9 @@ static void help( char *name ) {
   HELPLINE("-b file","specify blacklist file.");
 #elif defined( WANT_ACCESSLIST_WHITE )
   HELPLINE("-w file","specify whitelist file.");
+#endif
+#ifdef WANT_ADDRESS_TRANSLATION
+  HELPLINE("-T file","specify address translation rules file.");
 #endif
 
   fprintf( stderr, "\nExample:   ./opentracker -i 127.0.0.1 -p 6969 -P 6969 -f ./opentracker.conf -i 10.1.1.23 -p 2710 -p 80\n" );
@@ -455,6 +461,10 @@ int parse_configfile( char * config_filename ) {
       if( !scan_ip6_port( p+24, tmpip, &tmpport )) goto parse_error;
       livesync_bind_mcast( tmpip, tmpport );
 #endif
+#ifdef WANT_TRANSLATION
+    } else if (!byte_diff(p, 30, "address_translation.rules_file") && isspace(p[30])) {
+      set_config_option(&g_address_translation_rules_file, p+31);
+#endif
     } else
       fprintf( stderr, "Unhandled line in config file: %s\n", inbuf );
     continue;
@@ -575,6 +585,9 @@ int main( int argc, char **argv ) {
 #elif defined( WANT_ACCESSLIST_WHITE )
 "w:"
 #endif
+#ifdef WANT_TRANSLATION
+"T:"
+#endif
     "h" ) ) {
       case -1 : scanon = 0; break;
       case 'i':
@@ -604,6 +617,9 @@ int main( int argc, char **argv ) {
         if( !scan_ip6( optarg, tmpip )) { usage( argv[0] ); exit( 1 ); }
         accesslist_blessip( tmpip, 0xffff ); /* Allow everything for now */
         break;
+#ifdef WANT_TRANSLATION
+      case 'T': set_config_option( &g_address_translation_rules_file, optarg); break;
+#endif
       case 'f': bound += parse_configfile( optarg ); break;
       case 'h': help( argv[0] ); exit( 0 );
       case 'v': {

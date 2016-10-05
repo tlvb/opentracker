@@ -22,14 +22,14 @@ BINDIR?=$(PREFIX)/bin
 #FEATURES+=-DWANT_V6
 
 #FEATURES+=-DWANT_ACCESSLIST_BLACK
-#FEATURES+=-DWANT_ACCESSLIST_WHITE
+FEATURES+=-DWANT_ACCESSLIST_WHITE
 
 #FEATURES+=-DWANT_SYNC_LIVE
 #FEATURES+=-DWANT_IP_FROM_QUERY_STRING
 #FEATURES+=-DWANT_COMPRESSION_GZIP
 #FEATURES+=-DWANT_COMPRESSION_GZIP_ALWAYS
 #FEATURES+=-DWANT_LOG_NETWORKS
-#FEATURES+=-DWANT_RESTRICT_STATS
+FEATURES+=-DWANT_RESTRICT_STATS
 #FEATURES+=-DWANT_IP_FROM_PROXY
 #FEATURES+=-DWANT_FULLLOG_NETWORKS
 #FEATURES+=-DWANT_LOG_NUMWANT
@@ -37,9 +37,11 @@ BINDIR?=$(PREFIX)/bin
 #FEATURES+=-DWANT_SPOT_WOODPECKER
 #FEATURES+=-DWANT_SYSLOGS
 #FEATURES+=-DWANT_DEV_RANDOM
+FEATURES+=-DWANT_TRANSLATION
 FEATURES+=-DWANT_FULLSCRAPE
 
 #FEATURES+=-D_DEBUG_HTTPERROR
+#FEATURES+=-D_DEBUG_TRANSLATION
 
 OPTS_debug=-D_DEBUG -g -ggdb # -pg -fprofile-arcs -ftest-coverage
 OPTS_production=-O3
@@ -48,8 +50,8 @@ CFLAGS+=-I$(LIBOWFAT_HEADERS) -Wall -pipe -Wextra #-ansi -pedantic
 LDFLAGS+=-L$(LIBOWFAT_LIBRARY) -lowfat -pthread -lpthread -lz
 
 BINARY =opentracker
-HEADERS=trackerlogic.h scan_urlencoded_query.h ot_mutex.h ot_stats.h ot_vector.h ot_clean.h ot_udp.h ot_iovec.h ot_fullscrape.h ot_accesslist.h ot_http.h ot_livesync.h ot_rijndael.h
-SOURCES=opentracker.c trackerlogic.c scan_urlencoded_query.c ot_mutex.c ot_stats.c ot_vector.c ot_clean.c ot_udp.c ot_iovec.c ot_fullscrape.c ot_accesslist.c ot_http.c ot_livesync.c ot_rijndael.c
+HEADERS=trackerlogic.h scan_urlencoded_query.h ot_mutex.h ot_stats.h ot_vector.h ot_clean.h ot_udp.h ot_iovec.h ot_fullscrape.h ot_accesslist.h ot_http.h ot_livesync.h ot_rijndael.h address_translation.h
+SOURCES=opentracker.c trackerlogic.c scan_urlencoded_query.c ot_mutex.c ot_stats.c ot_vector.c ot_clean.c ot_udp.c ot_iovec.c ot_fullscrape.c ot_accesslist.c ot_http.c ot_livesync.c ot_rijndael.c address_translation.c
 SOURCES_proxy=proxy.c ot_vector.c ot_mutex.c
 
 OBJECTS = $(SOURCES:%.c=%.o)

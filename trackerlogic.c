@@ -28,8 +28,15 @@
 #include "ot_fullscrape.h"
 #include "ot_livesync.h"
 
+/* hack */
+#include "address_translation.h"
+
 /* Forward declaration */
+#ifdef WANT_TRANSLATION
+size_t return_peers_for_torrent( ot_torrent *torrent, size_t amount, char *reply, PROTO_FLAG proto, ot_peer *reqfrom );
+#else
 size_t return_peers_for_torrent( ot_torrent *torrent, size_t amount, char *reply, PROTO_FLAG proto );
+#endif
 
 void free_peerlist( ot_peerlist *peer_list ) {
   if( peer_list->peers.data ) {
@@ -178,12 +185,20 @@ size_t add_peer_to_torrent_and_return_peers( PROTO_FLAG proto, struct ot_workstr
   }
 #endif
 
+#ifdef WANT_TRANSLATION
+  ws->reply_size = return_peers_for_torrent( torrent, amount, ws->reply, proto, &ws->peer );
+#else
   ws->reply_size = return_peers_for_torrent( torrent, amount, ws->reply, proto );
+#endif
   mutex_bucket_unlock_by_hash( *ws->hash, delta_torrentcount );
   return ws->reply_size;
 }
 
+#ifdef WANT_TRANSLATION
+static size_t return_peers_all( ot_peerlist *peer_list, char *reply, ot_peer *reqfrom ) {
+#else
 static size_t return_peers_all( ot_peerlist *peer_list, char *reply ) {
+#endif
   unsigned int bucket, num_buckets = 1;
   ot_vector  * bucket_list = &peer_list->peers;
   size_t       result = OT_PEER_COMPARE_SIZE * peer_list->peer_count;
@@ -201,8 +216,14 @@ static size_t return_peers_all( ot_peerlist *peer_list, char *reply ) {
       if( OT_PEERFLAG(peers) & PEER_FLAG_SEEDING ) {
         r_end-=OT_PEER_COMPARE_SIZE;
         memcpy(r_end,peers++,OT_PEER_COMPARE_SIZE);      
+#ifdef WANT_TRANSLATION
+		translate(r_end, reqfrom);
+#endif
       } else {
         memcpy(reply,peers++,OT_PEER_COMPARE_SIZE);
+#ifdef WANT_TRANSLATION
+		translate(reply, reqfrom);
+#endif
         reply+=OT_PEER_COMPARE_SIZE;
       }
     }
@@ -210,7 +231,11 @@ static size_t return_peers_all( ot_peerlist *peer_list, char *reply ) {
   return result;
 }
 
+#ifdef WANT_TRANSLATION
+static size_t return_peers_selection( ot_peerlist *peer_list, size_t amount, char *reply, ot_peer *reqfrom ) {
+#else
 static size_t return_peers_selection( ot_peerlist *peer_list, size_t amount, char *reply ) {
+#endif
   unsigned int bucket_offset, bucket_index = 0, num_buckets = 1;
   ot_vector  * bucket_list = &peer_list->peers;
   unsigned int shifted_pc = peer_list->peer_count;
@@ -250,8 +275,14 @@ static size_t return_peers_selection( ot_peerlist *peer_list, size_t amount, cha
     if( OT_PEERFLAG(peer) & PEER_FLAG_SEEDING ) {
       r_end-=OT_PEER_COMPARE_SIZE;
       memcpy(r_end,peer,OT_PEER_COMPARE_SIZE);      
+#ifdef WANT_TRANSLATION
+		translate(r_end, reqfrom);
+#endif
     } else {
       memcpy(reply,peer,OT_PEER_COMPARE_SIZE);
+#ifdef WANT_TRANSLATION
+		translate(reply, reqfrom);
+#endif
       reply+=OT_PEER_COMPARE_SIZE;
     }
   }
@@ -262,7 +293,11 @@ static size_t return_peers_selection( ot_peerlist *peer_list, size_t amount, cha
    * reply must have enough space to hold 92+6*amount bytes
    * does not yet check not to return self
 */
+#ifdef WANT_TRANSLATION
+size_t return_peers_for_torrent( ot_torrent *torrent, size_t amount, char *reply, PROTO_FLAG proto, ot_peer *reqfrom ) {
+#else
 size_t return_peers_for_torrent( ot_torrent *torrent, size_t amount, char *reply, PROTO_FLAG proto ) {
+#endif
   ot_peerlist *peer_list = torrent->peer_list;
   char        *r = reply;
 
@@ -281,9 +316,17 @@ size_t return_peers_for_torrent( ot_torrent *torrent, size_t amount, char *reply
 
   if( amount ) {
     if( amount == peer_list->peer_count )
+#if WANT_TRANSLATION
+      r += return_peers_all( peer_list, r, reqfrom );
+#else
       r += return_peers_all( peer_list, r );
+#endif
     else
+#if WANT_TRANSLATION
+      r += return_peers_selection( peer_list, amount, r, reqfrom );
+#else
       r += return_peers_selection( peer_list, amount, r );
+#endif
   }
 
   if( proto == FLAG_TCP )
@@ -411,6 +454,7 @@ void exerr( char * message ) {
 }
 
 void trackerlogic_init( ) {
+  load_translation_rules();
   g_tracker_id = random();
 
   if( !g_stats_path )
@@ -452,6 +496,7 @@ void trackerlogic_deinit( void ) {
   clean_deinit( );
   /* Release mutexes */
   mutex_deinit( );
+  unload_translation_rules();
 }
 
 const char *g_version_trackerlogic_c = "$Source$: $Revision$\n";
