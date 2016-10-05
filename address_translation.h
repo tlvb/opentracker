@@ -1,3 +1,4 @@
+// vim: et:ts=2:sw=2
 #ifndef address_translation_h
 #define address_translation_h
 #include "trackerlogic.h"
@@ -9,17 +10,18 @@
 #	define RULES_IP_LENGTH 4
 #	define RULES_IP_OFFSET 12
 #endif
+# define RULES_IP_BIT_COUNT (RULES_IP_LENGTH<<3)
 
 typedef struct {
-	ot_net for_whom;
-	uint8_t stopper;
-	ot_net from;
-	ot_ip6 to;
+  ot_net for_whom;
+  uint8_t stopper;
+  ot_net from;
+  ot_ip6 to;
 } tr_rule;
 
 typedef struct {
-	size_t n;
-	tr_rule *entry;
+  size_t n;
+  tr_rule *entry;
 } tr_ruleset;
 
 #ifndef address_translation_c
