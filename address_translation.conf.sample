@@ -21,31 +21,56 @@
 # to a peer on the local net, since they will have their announced addresses be the local
 # ones.
 #
+# After some amount of time the clients running on local nets will ask the tracker for
+# new peers, get wind of the ones that would have tried and failed to connect to it,
+# and only then, when the client on the local net is the initiator, will a connection
+# be successfully established.
+#
 # Some/all of these problems can be fixed by other ways too, e.g. running a tracker and
 # torrent client that supports setting the ip by query string rather than taking it from
 # the connection (but mine does not support that!), and/or getting a gateway that supports
 # hairpinning (but I have a cheap and shitty gateway and no money for new hardware!)
 #
-# Another way is to translate the addresses reported by the tracker,
-# depending on who is asking:
+# Another way, the way used in this modified version of opentracker, is to translate
+# the addresses reported by the tracker, depending on who is asking:
 #
-# The rules are tested from top to bottom, the first rule that matches is used.
-# "nothing more" can be used to force a match without any translation, in order
-# to make hosts on specific nets but not yet matching bow out of trying to
-# apply a more general rule.
-# The first CIDR net is matched against the host that sent the announce request.
-# The second CIDR net is matched against the peers for the specific torrent asked about.
-# The third IP address is what substitutes the addresses that matched the second CIDR net.
-# E.g. for the setup previously described>
+# When an announce request is made to the tracker from a client, each peer returned
+# is passed through a set of translation rules based on the source ip of the announce
+# request, and the peer address.
+#
+# The rules are tried in the order they are listed in the config and the first rule
+# that matches is used.
+#
+# the rules are line oriented, and has a syntax as presented below, in a format inspired by BNF:
+#
+# VALID-LINE ::= "" | COMMENT | RULE
+# COMMENT    ::= ( SP | '#' ) followed by zero or more characters until end of line
+# SP         ::= one or more characters that count as space by isspace()
+# RULE       ::= "for" SP SOURCE-NET SP ACTION
+# ACTION     ::= "no further action" | "translate" SP PEER-NET SP "to" SP PEER-IP
+# SOURCE-NET ::= IP "/" BITS
+# PEER-NET   ::= IP "/" BITS
+# PEER-IP    ::= IP
+# IP         ::= ipv4 or ipv6 address, what makes sense depends on compilation options
+# BITS       ::= network / subnet bit count, should be in range of the ip address length
+#
+# Explanation:
+#
+# For any request from a source matching a rule's SOURCE-NET, if the rule continues with
+# "no further action", it is considered a match, no further rules are tried, and no translation
+# is made. Otherwise, if a peer matches the PEER-NET that peer's ip address will be
+# substituted for the PEER-IP in that rule in the data returned to the source of the request.
+#
+# E.g. for the setup previously described the following rules would make sense:
 
 # The initial seed can access both the external and local net, so it should see all
 # addresses as they are, bow out.
-for 127.0.0.1/32 nothing more
+for 127.0.0.1/32 no further action
 
 # Clients on the local net should reach the initial seed host by it's local-net address
 # but that is all
 for 192.168.0.0/16 translate 127.0.0.1/32 to 192.168.0.42
-for 192.168.0.0/16 nothing more
+for 192.168.0.0/16 no further action
 
 # anything outside the local net should reach hosts on the local net by the external
 # ip address. How many of the local peers that can actually be connected to is a
@@ -53,14 +78,3 @@ for 192.168.0.0/16 nothing more
 for 0.0.0.0/0 translate 127.0.0.1/32 to 77.0.0.77
 for 0.0.0.0/0 translate 192.168.0.0/16 to 77.0.0.77
 
-# ADDRESS TRANSLATION RULE SYNTAX, somewhat BNF-inspired:
-#
-# line             ::= BOL ( "" | comment | rule ) EOL
-# comment          ::= ( space | '#' ) anything-not-line-ending*
-# space            ::= one or more characters that count as space by isspace()
-# rule             ::= "for" space CIDR space ( stopper-spec | translation-spec )
-# stopper-spec     ::= "nothing more"
-# translation-spec ::= "translate" space CIDR space "to" space IP
-# CIDR             ::= IP "/" bits
-# IP               ::= ipv4 or ipv6 address, what makes sense depends on compilation options
-# bits             ::= network / subnet bit count, should be in range of the ip address length

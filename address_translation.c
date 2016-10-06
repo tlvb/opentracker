@@ -60,12 +60,12 @@ static void reload_translation_rules(void) {
     if (!scan_int(p, &bits))                                                             { ruleset_error("Expected IP/BITS after \"for\": malformed BITS", inbuf); return; }
     if (bits < 0 || bits > RULES_IP_BIT_COUNT)                                           { ruleset_error("Expected IP/BITS after \"for\": invalid amount of BITS", inbuf); return; }
     g_translation_rules.entry[g_translation_rules.n].for_whom.bits = bits;
-    if (strstr(p, "nothing more") != NULL) {
+    if (strstr(p, "no further action") != NULL) {
       g_translation_rules.entry[g_translation_rules.n].stopper = 1;
     }
     else {
       g_translation_rules.entry[g_translation_rules.n].stopper = 0;
-      if ((p = strstr(p, "translate")) == NULL)                                          { ruleset_error("Expected key sequences \"translate\" or \"nothing more\"", inbuf); return; }
+      if ((p = strstr(p, "translate")) == NULL)                                          { ruleset_error("Expected key sequences \"translate\" or \"no further action\"", inbuf); return; }
       p += 9; while (isspace(*(++p)));
       if (!scan_ip6(p, g_translation_rules.entry[g_translation_rules.n].from.address))   { ruleset_error("Expected IP/BITS after \"translate\": malformed IP", inbuf); return; }
       if ((p = strchr(p, '/')) == NULL)                                                  { ruleset_error("Expected IP/BITS after \"translate\": malformed \"/\"", inbuf); return; }
