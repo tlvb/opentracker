@@ -110,4 +110,6 @@
 #      translate the addresses returned by an announce requesti
 #      (shell option -T).
 #
+#      Note: this file is reloaded on SIGUSR1
+#
 # address_translation.rules_file address_translation.conf.sample

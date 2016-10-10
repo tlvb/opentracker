@@ -21,15 +21,14 @@
 # to a peer on the local net, since they will have their announced addresses be the local
 # ones.
 #
-# After some amount of time the clients running on local nets will ask the tracker for
+# After some amount of time, the clients on local nets will ask the tracker for
 # new peers, get wind of the ones that would have tried and failed to connect to it,
 # and only then, when the client on the local net is the initiator, will a connection
 # be successfully established.
 #
 # Some/all of these problems can be fixed by other ways too, e.g. running a tracker and
 # torrent client that supports setting the ip by query string rather than taking it from
-# the connection (but mine does not support that!), and/or getting a gateway that supports
-# hairpinning (but I have a cheap and shitty gateway and no money for new hardware!)
+# the connection, and getting a gateway that supports hairpinning.
 #
 # Another way, the way used in this modified version of opentracker, is to translate
 # the addresses reported by the tracker, depending on who is asking:
@@ -67,7 +66,7 @@
 # addresses as they are, bow out.
 for 127.0.0.1/32 no further action
 
-# Clients on the local net should reach the initial seed host by it's local-net address
+# Clients on the local net should reach the initial seed host by its local-net address
 # but that is all
 for 192.168.0.0/16 translate 127.0.0.1/32 to 192.168.0.42
 for 192.168.0.0/16 no further action
